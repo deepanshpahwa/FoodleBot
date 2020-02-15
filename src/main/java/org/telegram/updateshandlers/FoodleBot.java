@@ -14,10 +14,10 @@ import org.telegram.telegrambots.meta.logging.BotLogger;
  * @brief Handler for updates to Weather Bot
  * @date 24 of June of 2015
  */
-public class WeatherHandlers extends TelegramLongPollingBot {
+public class FoodleBot extends TelegramLongPollingBot {
     private static final String LOGTAG = "WEATHERHANDLERS";
 
-    public WeatherHandlers() {
+    public FoodleBot() {
         super();
 //        startAlertTimers();
     }
@@ -42,7 +42,10 @@ public class WeatherHandlers extends TelegramLongPollingBot {
     }
 
     private void handleIncomingMessage(Message message) {
-         messageOnMainMenu(message);
+        if (message.getText().equals("/start")){
+            messageOnstart(message);
+        }
+
 
 
     }
@@ -52,10 +55,13 @@ public class WeatherHandlers extends TelegramLongPollingBot {
         return BotConfig.WEATHER_USER;
     }
 
-    private SendMessage messageOnMainMenu(Message message) {
+    private SendMessage messageOnstart(Message message) {
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(message.getChatId())
-                .setText("Hello Srushti");
+                .setText("Hello, how may I help you? \n" +
+                        "Enter 1, for placing food order \n" +
+                        "Enter 2, to inquire food stall timings");
+
         try {
             execute(sendMessageRequest); // Sending our message object to user
         } catch (TelegramApiException e) {
