@@ -20,6 +20,9 @@ import java.lang.invoke.SwitchPoint;
 public class FoodleBot extends TelegramLongPollingBot {
     private static final String LOGTAG = "WEATHERHANDLERS";
     private static final String CANTEEN_NUMBER = "1";
+    private static final String STALL_NUMBER = "2" ;
+    private static final String INITIAL_SELECTION = "3";
+
     private String INFO_REQUESTED = "";
 
     //TODO Srushti
@@ -28,7 +31,6 @@ public class FoodleBot extends TelegramLongPollingBot {
     private static final String CANTEEN_3 = "canteen from Hall 16";
     private static final String CANTEEN_4 = "canteen from Hall Crescent";
     private static final String CANTEEN_5 = "canteen from Hall 9";
-    private static final String STALL_NUMBER = "soso" ;
 
 
     public FoodleBot() {
@@ -39,6 +41,11 @@ public class FoodleBot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         return BotConfig.WEATHER_TOKEN;
+    }
+
+    @Override
+    public String getBotUsername() {
+        return BotConfig.WEATHER_USER;
     }
 
     @Override
@@ -58,9 +65,19 @@ public class FoodleBot extends TelegramLongPollingBot {
     private void handleIncomingMessage(Message message) {
         UserInformation userinformation = new UserInformation();
 
-        if (INFO_REQUESTED.equals(CANTEEN_NUMBER)){
+        if (INFO_REQUESTED.equals(INITIAL_SELECTION)){
+            userinformation.setInitialSelection(message.getText());
+            if (userinformation.getInitialSelection().equals("1")){
+                canteenSelectionMessage(message, "select a food stall");
+            }
+        }
+
+        else if (INFO_REQUESTED.equals(CANTEEN_NUMBER)){
             userinformation.setCanteen(getCanteenFromIndexNumber(message.getText().trim()));
             foodStallSelectionMessage(message,userinformation.getCanteen());
+        } else if (INFO_REQUESTED.equals(STALL_NUMBER)){
+            userinformation.setStallNumber(message.getText().trim());
+            foodItemSelectMessage(message,userinformation.getStallNumber());
         }
 
         switch (message.getText().trim()){
@@ -69,32 +86,13 @@ public class FoodleBot extends TelegramLongPollingBot {
             case "/stop":
             case "/help":
             case "/menu":
-            case "1" :
-                canteenSelectionMessage(message, "select a food stall");
-
-
+//            case "1" :
+//                canteenSelectionMessage(message, "select a food stall");
         }
-
-
     }
 
-    private String getCanteenFromIndexNumber(String indexnumber) {
-
-
-        switch (indexnumber){
-            case "1":
-                return CANTEEN_1;
-            case "2":
-                return CANTEEN_2;
-            case "3":
-                return CANTEEN_3;
-            case "4":
-                return CANTEEN_4;
-            case "5":
-                return CANTEEN_5;
-
-        }
-        return "ERROR";//TODO Deepansh Catch Error
+    private void foodItemSelectMessage(Message message, String stallNumber) {
+        sendMessageToUser(message,"Stopping here for now "+stallNumber);
     }
 
     private void foodStallSelectionMessage(Message incomingMessage, String canteen) {
@@ -131,23 +129,33 @@ public class FoodleBot extends TelegramLongPollingBot {
         return sendMessageRequest;
     }
 
-    @Override
-    public String getBotUsername() {
-        return BotConfig.WEATHER_USER;
+    private SendMessage messageOnstart(Message message) {
+        SendMessage ret = sendMessageToUser(message, "Hello, how may I help you? \n" +
+                "Enter 1, for placing food order \n" +
+                "Enter 2, to inquire food stall timings");
+
+        INFO_REQUESTED = INITIAL_SELECTION;
+        return ret;
+
     }
 
-    private SendMessage messageOnstart(Message message) {
-        SendMessage sendMessageRequest = new SendMessage();
-        sendMessageRequest.setChatId(message.getChatId())
-                .setText("Hello, how may I help you? \n" +
-                        "Enter 1, for placing food order \n" +
-                        "Enter 2, to inquire food stall timings");
 
-        try {
-            execute(sendMessageRequest); // Sending our message object to user
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+    private String getCanteenFromIndexNumber(String indexnumber) {
+
+
+        switch (indexnumber){
+            case "1":
+                return CANTEEN_1;
+            case "2":
+                return CANTEEN_2;
+            case "3":
+                return CANTEEN_3;
+            case "4":
+                return CANTEEN_4;
+            case "5":
+                return CANTEEN_5;
+
         }
-        return sendMessageRequest;
+        return "ERROR";//TODO Deepansh Catch Error
     }
 }
