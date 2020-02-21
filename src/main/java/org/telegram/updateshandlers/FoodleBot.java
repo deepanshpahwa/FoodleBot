@@ -9,29 +9,20 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.lang.invoke.SwitchPoint;
-
 /**
- * @author Ruben Bermudez
+ * @author
  * @version 1.0
- * @brief Handler for updates to Weather Bot
+ * @brief Handler for updates to FoodleNTU Bot
  * @date 24 of June of 2015
  */
 public class FoodleBot extends TelegramLongPollingBot {
-    private static final String LOGTAG = "WEATHERHANDLERS";
-    private static final String CANTEEN_NUMBER = "1";
-    private static final String STALL_NUMBER = "2" ;
-    private static final String INITIAL_SELECTION = "3";
+    private static final String LOGTAG = "FOODLE_BOT_NTU_HANDLER";
+
+    private static final String CANTEEN_NUMBER = "canteen number";
+    private static final String STALL_NUMBER = "stall number" ;
+    private static final String INITIAL_SELECTION = "initial selection";
 
     private String INFO_REQUESTED = "";
-
-    //TODO Srushti
-    private static final String CANTEEN_1 = "canteen from Hall 1";
-    private static final String CANTEEN_2 = "canteen from Hall 2";
-    private static final String CANTEEN_3 = "canteen from Hall 16";
-    private static final String CANTEEN_4 = "canteen from Hall Crescent";
-    private static final String CANTEEN_5 = "canteen from Hall 9";
-
 
     public FoodleBot() {
         super();
@@ -65,49 +56,41 @@ public class FoodleBot extends TelegramLongPollingBot {
     private void handleIncomingMessage(Message message) {
         UserInformation userinformation = new UserInformation();
 
-        if (INFO_REQUESTED.equals(INITIAL_SELECTION)){
-            userinformation.setInitialSelection(message.getText());
-            if (userinformation.getInitialSelection().equals("1")){
-                canteenSelectionMessage(message, "select a food stall");
-            }
-        }
+        switch (INFO_REQUESTED) {
 
-        else if (INFO_REQUESTED.equals(CANTEEN_NUMBER)){
-            userinformation.setCanteen(getCanteenFromIndexNumber(message.getText().trim()));
-            foodStallSelectionMessage(message,userinformation.getCanteen());
-        } else if (INFO_REQUESTED.equals(STALL_NUMBER)){
-            userinformation.setStallNumber(message.getText().trim());
-            foodItemSelectMessage(message,userinformation.getStallNumber());
-        }
-
-        switch (message.getText().trim()){
             case "/start":
                 messageOnstart(message);
+
+            case INITIAL_SELECTION:
+                userinformation.setInitialSelection(message.getText());
+                if (userinformation.getInitialSelection().equals("1")) {
+                    canteenSelectionMessage(message, Utils.MESSAGE_LIST_OF_CANTEENS);
+                }
+                break;
+            case CANTEEN_NUMBER:
+                //TODO check if message contains any non numeric elements
+                userinformation.setCanteen(Utils.getCanteenFromIndexNumber(message.getText().trim()));
+                foodStallSelectionMessage(message, userinformation.getCanteen());
+                break;
+            case STALL_NUMBER:
+                userinformation.setStallNumber(message.getText().trim());
+                foodItemSelectMessage(message, userinformation.getStallNumber());
+                break;
+
+
             case "/stop":
             case "/help":
             case "/menu":
-//            case "1" :
-//                canteenSelectionMessage(message, "select a food stall");
         }
+
     }
 
     private void foodItemSelectMessage(Message message, String stallNumber) {
-        sendMessageToUser(message,"Stopping here for now "+stallNumber);
+        sendMessageToUser(message,"Stopping here for now ");
     }
 
     private void foodStallSelectionMessage(Message incomingMessage, String canteen) {
-        switch (canteen){
-            case CANTEEN_1:
-                sendMessageToUser(incomingMessage, Utils.MESSAGE_LIST_OF_STALLS_IN_CANTEEN_1);
-            case CANTEEN_2:
-                sendMessageToUser(incomingMessage, Utils.MESSAGE_LIST_OF_STALLS_IN_CANTEEN_2);
-            case CANTEEN_3:
-                sendMessageToUser(incomingMessage, Utils.MESSAGE_LIST_OF_STALLS_IN_CANTEEN_3);
-            case CANTEEN_4:
-                sendMessageToUser(incomingMessage, Utils.MESSAGE_LIST_OF_STALLS_IN_CANTEEN_4);
-            case CANTEEN_5:
-                sendMessageToUser(incomingMessage, Utils.MESSAGE_LIST_OF_STALLS_IN_CANTEEN_5);
-        }
+        sendMessageToUser(incomingMessage,Utils.getFoodStallSelectionMessage(canteen));
         INFO_REQUESTED = STALL_NUMBER;
     }
 
@@ -116,46 +99,21 @@ public class FoodleBot extends TelegramLongPollingBot {
         INFO_REQUESTED = CANTEEN_NUMBER;
     }
 
-    private SendMessage sendMessageToUser(Message incomingMessage, String outgoingMessage) {
+    private void sendMessageToUser(Message incomingMessage, String outgoingMessage) {
         SendMessage sendMessageRequest = new SendMessage();
-        sendMessageRequest.setChatId(incomingMessage.getChatId())
-                .setText(outgoingMessage);
+        sendMessageRequest.setChatId(incomingMessage.getChatId()).setText(outgoingMessage);
 
         try {
             execute(sendMessageRequest); // Sending our message object to user
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
-        return sendMessageRequest;
+
     }
 
-    private SendMessage messageOnstart(Message message) {
-        SendMessage ret = sendMessageToUser(message, "Hello, how may I help you? \n" +
-                "Enter 1, for placing food order \n" +
-                "Enter 2, to inquire food stall timings");
-
+    private void messageOnstart(Message message) {
+        sendMessageToUser(message, Utils.OUTGOING_MESSAGE_ON_START);
         INFO_REQUESTED = INITIAL_SELECTION;
-        return ret;
-
     }
 
-
-    private String getCanteenFromIndexNumber(String indexnumber) {
-
-
-        switch (indexnumber){
-            case "1":
-                return CANTEEN_1;
-            case "2":
-                return CANTEEN_2;
-            case "3":
-                return CANTEEN_3;
-            case "4":
-                return CANTEEN_4;
-            case "5":
-                return CANTEEN_5;
-
-        }
-        return "ERROR";//TODO Deepansh Catch Error
-    }
 }
