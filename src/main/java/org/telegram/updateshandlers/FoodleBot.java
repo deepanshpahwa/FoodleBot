@@ -1,6 +1,7 @@
 package org.telegram.updateshandlers;
 
 import org.telegram.BotConfig;
+import org.telegram.Chat;
 import org.telegram.Utils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -8,6 +9,11 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+
 
 /**
  * @author
@@ -24,9 +30,17 @@ public class FoodleBot extends TelegramLongPollingBot {
 
     private String INFO_REQUESTED = "";
 
+    private static ArrayList<Chat> chatList;
+    private HashMap<String, UserInformation> chatIdHash;
+
     public FoodleBot() {
         super();
-//        startAlertTimers();
+        createListOfChats();
+    }
+
+    private void createListOfChats() {
+//        chatList = new ArrayList<Chat>();
+        chatIdHash = new HashMap<>();
     }
 
     @Override
@@ -54,49 +68,60 @@ public class FoodleBot extends TelegramLongPollingBot {
     }
 
     private void handleIncomingMessage(Message message) {
-        UserInformation userinformation = new UserInformation();
 
-        switch (INFO_REQUESTED) {
-
-            case "/start":
-                messageOnstart(message);
-
-            case INITIAL_SELECTION:
-                userinformation.setInitialSelection(message.getText());
-                if (userinformation.getInitialSelection().equals("1")) {
-                    canteenSelectionMessage(message, Utils.MESSAGE_LIST_OF_CANTEENS);
-                }
-                break;
-            case CANTEEN_NUMBER:
-                //TODO check if message contains any non numeric elements
-                userinformation.setCanteen(Utils.getCanteenFromIndexNumber(message.getText().trim()));
-                foodStallSelectionMessage(message, userinformation.getCanteen());
-                break;
-            case STALL_NUMBER:
-                userinformation.setStallNumber(message.getText().trim());
-                foodItemSelectMessage(message, userinformation.getStallNumber());
-                break;
+        if (chatIdHash.containsKey(String.valueOf(message.getChatId()))) {
+            UserInformation currentUserInformation = chatIdHash.get(message.getChatId());
 
 
-            case "/stop":
-            case "/help":
-            case "/menu":
+            switch (currentUserInformation.getInfoRequested()) {
+
+                case INITIAL_SELECTION:
+                    currentUserInformation.setInitialSelection(message.getText());
+                    if (currentUserInformation.getInitialSelection().equals("1")) {
+                        canteenSelectionMessage(message, Utils.MESSAGE_LIST_OF_CANTEENS, currentUserInformation);
+                    }
+                    break;
+                case CANTEEN_NUMBER:
+                    //TODO check if message contains any non numeric elements
+                    currentUserInformation.setCanteen(Utils.getCanteenFromIndexNumber(message.getText().trim()));
+                    foodStallSelectionMessage(message, currentUserInformation.getCanteen(), currentUserInformation);
+                    break;
+                case STALL_NUMBER:
+                    currentUserInformation.setStallNumber(message.getText().trim());
+                    foodItemSelectMessage(message, currentUserInformation.getStallNumber(), currentUserInformation);
+                    break;
+
+
+                case "/stop":
+                case "/help":
+                case "/menu":
+            }
+        }else{
+            UserInformation userinformation = new UserInformation();
+            chatIdHash.put(String.valueOf(message.getChatId()),userinformation);
+
+            if (message.getText().equals("/start")) {
+                messageOnstart(message, userinformation);
+            }
+
+
         }
 
     }
 
-    private void foodItemSelectMessage(Message message, String stallNumber) {
+    private void foodItemSelectMessage(Message message, String stallNumber, UserInformation currentUserInformation) {
         sendMessageToUser(message,"Stopping here for now ");
+        currentUserInformation.setInfoRequested("TBD");//TODO
     }
 
-    private void foodStallSelectionMessage(Message incomingMessage, String canteen) {
+    private void foodStallSelectionMessage(Message incomingMessage, String canteen, UserInformation currentUserInformation) {
         sendMessageToUser(incomingMessage,Utils.getFoodStallSelectionMessage(canteen));
-        INFO_REQUESTED = STALL_NUMBER;
+        currentUserInformation.setInfoRequested(STALL_NUMBER);
     }
 
-    private void canteenSelectionMessage(Message incomingMessage, String outgoingMessage) {
+    private void canteenSelectionMessage(Message incomingMessage, String outgoingMessage, UserInformation currentUserInformation) {
         sendMessageToUser(incomingMessage,outgoingMessage);
-        INFO_REQUESTED = CANTEEN_NUMBER;
+         currentUserInformation.setInfoRequested(CANTEEN_NUMBER);
     }
 
     private void sendMessageToUser(Message incomingMessage, String outgoingMessage) {
@@ -111,9 +136,9 @@ public class FoodleBot extends TelegramLongPollingBot {
 
     }
 
-    private void messageOnstart(Message message) {
+    private void messageOnstart(Message message, UserInformation userinformation) {
         sendMessageToUser(message, Utils.OUTGOING_MESSAGE_ON_START);
-        INFO_REQUESTED = INITIAL_SELECTION;
+        userinformation.setInfoRequested(INITIAL_SELECTION);
     }
 
 }

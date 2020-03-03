@@ -5,6 +5,10 @@ public class UserInformation {
     private String stallNumber;
     private String initialSelection;
 
+
+
+    private String infoRequested;
+
     public void setCanteen(String canteen) {
         this.canteen = canteen;
     }
@@ -27,5 +31,13 @@ public class UserInformation {
 
     public String getInitialSelection() {
         return initialSelection;
+    }
+
+    public void setInfoRequested(String infoRequested) {
+        this.infoRequested = infoRequested;
+    }
+
+    public String getInfoRequested() {
+        return infoRequested;
     }
 }
