@@ -2,11 +2,9 @@ package org.telegram.updateshandlers;
 
 public class UserInformation {
     private String canteen;
-    private String stallNumber;
+    private String stallName;
+    private String foodItem;
     private String initialSelection;
-
-
-
     private String infoRequested;
 
     public void setCanteen(String canteen) {
@@ -17,12 +15,12 @@ public class UserInformation {
         return canteen;
     }
 
-    public void setStallNumber(String stallNumber) {
-        this.stallNumber = stallNumber;
+    public void setStallName(String stallName) {
+        this.stallName = stallName;
     }
 
-    public String getStallNumber() {
-        return stallNumber;
+    public String getStallName() {
+        return stallName;
     }
 
     public void setInitialSelection(String initialSelection) {
@@ -39,5 +37,13 @@ public class UserInformation {
 
     public String getInfoRequested() {
         return infoRequested;
+    }
+
+    public void setFoodItem(String foodItem) {
+        this.foodItem = foodItem;
+    }
+
+    public String getFoodItem() {
+        return foodItem;
     }
 }

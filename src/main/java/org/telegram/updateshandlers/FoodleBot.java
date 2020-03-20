@@ -12,7 +12,6 @@ import org.telegram.telegrambots.meta.logging.BotLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 
 /**
@@ -27,6 +26,7 @@ public class FoodleBot extends TelegramLongPollingBot {
     private static final String CANTEEN_NUMBER = "canteen number";
     private static final String STALL_NUMBER = "stall number" ;
     private static final String INITIAL_SELECTION = "initial selection";
+    private static final String FOOD_ITEM = "food item";
 
     private String INFO_REQUESTED = "";
 
@@ -70,12 +70,18 @@ public class FoodleBot extends TelegramLongPollingBot {
     private void handleIncomingMessage(Message message) {
 
         if (chatIdHash.containsKey(String.valueOf(message.getChatId()))) {
-            UserInformation currentUserInformation = chatIdHash.get(message.getChatId());
+            System.out.println("IF");
 
+            UserInformation currentUserInformation = chatIdHash.get(message.getChatId().toString());
+
+            System.out.println(":::"+currentUserInformation.getInfoRequested());
 
             switch (currentUserInformation.getInfoRequested()) {
 
+
                 case INITIAL_SELECTION:
+                    System.out.println("INIT SELEC");
+
                     currentUserInformation.setInitialSelection(message.getText());
                     if (currentUserInformation.getInitialSelection().equals("1")) {
                         canteenSelectionMessage(message, Utils.MESSAGE_LIST_OF_CANTEENS, currentUserInformation);
@@ -87,9 +93,16 @@ public class FoodleBot extends TelegramLongPollingBot {
                     foodStallSelectionMessage(message, currentUserInformation.getCanteen(), currentUserInformation);
                     break;
                 case STALL_NUMBER:
-                    currentUserInformation.setStallNumber(message.getText().trim());
-                    foodItemSelectMessage(message, currentUserInformation.getStallNumber(), currentUserInformation);
+                    currentUserInformation.setStallName(Utils.getStallNameFromIndexNumber(message.getText().trim(),currentUserInformation.getCanteen()));
+                    foodItemSelectMessage(message, currentUserInformation);
                     break;
+                case FOOD_ITEM:
+                    currentUserInformation.setFoodItem(Utils.getFoodItemFromIndexNumber(message.getText().trim(), currentUserInformation));
+                    Utils.generateFoodOrder(currentUserInformation);
+                    finalMessageToUser(message);
+                    break;
+
+
 
 
                 case "/stop":
@@ -97,6 +110,7 @@ public class FoodleBot extends TelegramLongPollingBot {
                 case "/menu":
             }
         }else{
+            System.out.println("ELSE");
             UserInformation userinformation = new UserInformation();
             chatIdHash.put(String.valueOf(message.getChatId()),userinformation);
 
@@ -109,9 +123,13 @@ public class FoodleBot extends TelegramLongPollingBot {
 
     }
 
-    private void foodItemSelectMessage(Message message, String stallNumber, UserInformation currentUserInformation) {
-        sendMessageToUser(message,"Stopping here for now ");
-        currentUserInformation.setInfoRequested("TBD");//TODO
+    private void finalMessageToUser(Message message) {
+        sendMessageToUser(message,Utils.getFinalMessage());
+    }
+
+    private void foodItemSelectMessage(Message incomingMessage, UserInformation currentUserInformation) {
+        sendMessageToUser(incomingMessage,Utils.getMenuForStall(currentUserInformation));
+        currentUserInformation.setInfoRequested(FOOD_ITEM);//TODO
     }
 
     private void foodStallSelectionMessage(Message incomingMessage, String canteen, UserInformation currentUserInformation) {
@@ -121,7 +139,7 @@ public class FoodleBot extends TelegramLongPollingBot {
 
     private void canteenSelectionMessage(Message incomingMessage, String outgoingMessage, UserInformation currentUserInformation) {
         sendMessageToUser(incomingMessage,outgoingMessage);
-         currentUserInformation.setInfoRequested(CANTEEN_NUMBER);
+        currentUserInformation.setInfoRequested(CANTEEN_NUMBER);
     }
 
     private void sendMessageToUser(Message incomingMessage, String outgoingMessage) {
