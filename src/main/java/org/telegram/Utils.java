@@ -1,5 +1,6 @@
 package org.telegram;
 
+import org.telegram.updateshandlers.FoodleBot;
 import org.telegram.updateshandlers.UserInformation;
 
 public class Utils {
@@ -34,6 +35,8 @@ public class Utils {
             +"3. Canteen 3\n"
             +"4. Canteen 4\n"
             +"5. Canteen 5\n";
+    public static final String FOOD_STALL_SELECTION_MESSAGE = "Please choose from the following foos stalls";
+    public static final String FOOD_ITEM_SELECTION_MESSAGE = "Please select food item";
 
     private static String[] arrayOfCanteens = {"Canteen 1", "Canteen 2", "Canteen 3", "Canteen 4", "Canteen 5"};
 
@@ -68,7 +71,7 @@ public class Utils {
 
     public static String getCanteenFromIndexNumber(String indexnumber) {
         try {
-            return arrayOfCanteens[Integer.parseInt(indexnumber)];
+            return arrayOfCanteens[Integer.parseInt(indexnumber)-1];
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -79,7 +82,11 @@ public class Utils {
     public static String getFoodStallSelectionMessage(String canteen) {
 
         try {
-            if (canteen.equals(arrayOfCanteens[1])) {
+            if (canteen.equals(arrayOfCanteens[0])) {
+
+                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_1;
+
+            } else if (canteen.equals(arrayOfCanteens[1])) {
 
                 return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_1;
 
@@ -95,10 +102,6 @@ public class Utils {
 
                 return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_4;
 
-            } else if (canteen.equals(arrayOfCanteens[5])) {
-
-                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_5;
-
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -109,10 +112,10 @@ public class Utils {
     public static String getStallNameFromIndexNumber(String stallNumber, String canteen) {
 
         switch (canteen) {
-            case "canteen 1":
-                return canteen1FoodStallsArray[Integer.parseInt(stallNumber)][0];
-            case "canteen 2":
-                return canteen2FoodStallsArray[Integer.parseInt(stallNumber)][0];
+            case "Canteen 1":
+                return canteen1FoodStallsArray[Integer.parseInt(stallNumber)-1][0];
+            case "Canteen 2":
+                return canteen2FoodStallsArray[Integer.parseInt(stallNumber)-1][0];
 
 
             //TODO add more cases
@@ -123,22 +126,24 @@ public class Utils {
     }
 
     public static String getMenuForStall(UserInformation userInformation) {
-        if (userInformation.getCanteen().equals("Canteen 1")){
-            for (int i = 0; i < canteen1FoodStallsArray.length; i++) {
-                System.out.println("::128");
 
-                if (userInformation.getStallName().equals(canteen1FoodStallsArray[i][0])){
-                    System.out.println("::131");
+        String currentCanteen = userInformation.getCanteen();
+        String currentStall = userInformation.getStallName();
+
+        if (currentCanteen.equals("Canteen 1")){
+
+            for (int i = 0; i < canteen1FoodStallsArray.length; i++) {
+
+                if (currentStall.equals(canteen1FoodStallsArray[i][0])){
                     return canteen1FoodStallsArray[i][1];
 
                 }
 
-                System.out.println("::131");
 
             }
         }
 
-        if (userInformation.getCanteen().equals("Canteen 2")){
+        if (currentCanteen.equals("Canteen 2")){
             for (int i = 0; i < canteen2FoodStallsArray.length; i++) {
                 if (userInformation.getStallName().equals(canteen2FoodStallsArray[i][0])){
                     return canteen2FoodStallsArray[i][1];

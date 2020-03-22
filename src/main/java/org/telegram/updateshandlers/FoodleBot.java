@@ -27,6 +27,7 @@ public class FoodleBot extends TelegramLongPollingBot {
     private static final String STALL_NUMBER = "stall number" ;
     private static final String INITIAL_SELECTION = "initial selection";
     private static final String FOOD_ITEM = "food item";
+    private static final String FOOD_ITEM_SELECTION_MESSAGE = "Please seelct food item";
 
     private String INFO_REQUESTED = "";
 
@@ -90,16 +91,16 @@ public class FoodleBot extends TelegramLongPollingBot {
                 case CANTEEN_NUMBER:
                     //TODO check if message contains any non numeric elements
                     currentUserInformation.setCanteen(Utils.getCanteenFromIndexNumber(message.getText().trim()));
-                    foodStallSelectionMessage(message, currentUserInformation.getCanteen(), currentUserInformation);
+                    foodStallSelectionMessage(message, Utils.FOOD_STALL_SELECTION_MESSAGE+Utils.getFoodStallSelectionMessage(currentUserInformation.getCanteen()), currentUserInformation);
                     break;
                 case STALL_NUMBER:
                     currentUserInformation.setStallName(Utils.getStallNameFromIndexNumber(message.getText().trim(),currentUserInformation.getCanteen()));
-                    foodItemSelectMessage(message, currentUserInformation);
+                    foodItemSelectMessage(message,Utils.FOOD_ITEM_SELECTION_MESSAGE, currentUserInformation);
                     break;
                 case FOOD_ITEM:
                     currentUserInformation.setFoodItem(Utils.getFoodItemFromIndexNumber(message.getText().trim(), currentUserInformation));
                     Utils.generateFoodOrder(currentUserInformation);
-                    finalMessageToUser(message);
+                    finalMessageToUser(message,currentUserInformation.getFoodItem());
                     break;
 
 
@@ -123,17 +124,20 @@ public class FoodleBot extends TelegramLongPollingBot {
 
     }
 
-    private void finalMessageToUser(Message message) {
-        sendMessageToUser(message,Utils.getFinalMessage());
+    private void finalMessageToUser(Message message, String outgoingMessage) {
+        sendMessageToUser(message,outgoingMessage +Utils.getFinalMessage());
     }
 
-    private void foodItemSelectMessage(Message incomingMessage, UserInformation currentUserInformation) {
-        sendMessageToUser(incomingMessage,Utils.getMenuForStall(currentUserInformation));
+    private void foodItemSelectMessage(Message incomingMessage, String foodItemSelectionMessage, UserInformation currentUserInformation) {
+        System.out.println(currentUserInformation.getCanteen());
+        System.out.println(currentUserInformation.getStallName());
+
+        sendMessageToUser(incomingMessage,foodItemSelectionMessage + Utils.getMenuForStall(currentUserInformation));
         currentUserInformation.setInfoRequested(FOOD_ITEM);//TODO
     }
 
-    private void foodStallSelectionMessage(Message incomingMessage, String canteen, UserInformation currentUserInformation) {
-        sendMessageToUser(incomingMessage,Utils.getFoodStallSelectionMessage(canteen));
+    private void foodStallSelectionMessage(Message incomingMessage, String outgoingMessage, UserInformation currentUserInformation) {
+        sendMessageToUser(incomingMessage,outgoingMessage);
         currentUserInformation.setInfoRequested(STALL_NUMBER);
     }
 
@@ -159,4 +163,7 @@ public class FoodleBot extends TelegramLongPollingBot {
         userinformation.setInfoRequested(INITIAL_SELECTION);
     }
 
+//    public static void logger(String s) {
+//        System.out.println("::"+s);
+//    }
 }
