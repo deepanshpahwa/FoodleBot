@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
+import javax.rmi.CORBA.Util;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -27,7 +28,8 @@ public class FoodleBot extends TelegramLongPollingBot {
     private static final String STALL_NUMBER = "stall number" ;
     private static final String INITIAL_SELECTION = "initial selection";
     private static final String FOOD_ITEM = "food item";
-    private static final String FOOD_ITEM_SELECTION_MESSAGE = "Please seelct food item";
+    //    private static final String FOOD_ITEM_SELECTION_MESSAGE = "Please seelct food item";
+    private static final String ORDER_PLACED = "order placed";
 
     private String INFO_REQUESTED = "";
 
@@ -69,23 +71,46 @@ public class FoodleBot extends TelegramLongPollingBot {
     }
 
     private void handleIncomingMessage(Message message) {
+//        if (!Utils.validate(message)){
+//            sendMessageToUser(message,Utils.ERROR_MESSAGE);
+//        }
+        String inputMessage = message.getText();
 
-        if (chatIdHash.containsKey(String.valueOf(message.getChatId()))) {
-            System.out.println("IF");
+        if (inputMessage.equals("/start")){
+            if (chatIdHash.containsKey(message.getChatId().toString())){
+                if (chatIdHash.get(message.getChatId().toString()).getInfoRequested().equals(ORDER_PLACED)){
+                    sendMessageToUser(message, "Your order has already been placed.");
+                }else {
+                    sendMessageToUser(message, "Your order is under processing. If you would like to start from top, please enter /stop and start again.");
+                }
+            }else {
+                UserInformation userinformation = new UserInformation();
+                chatIdHash.put(String.valueOf(message.getChatId()), userinformation);
+                messageOnstart(message, userinformation);
+            }
+
+        }else if (inputMessage.equals("/stop")) {
+            sendMessageToUser(message, Utils.STOP_MESSAGE);
+            chatIdHash.remove(message.getChatId().toString());
+            return;
+        } else if (inputMessage.equals("/help")) {
+            sendMessageToUser(message, Utils.HELP_MESSAGE);
+            return;
+        } else if (inputMessage.equals("/menu")) {
+            sendMessageToUser(message, Utils.MENU_MESSAGE);
+            return;
+//        } else if ((!Utils.validate(message))){
+//            sendMessageToUser(message,Utils.ERROR_MESSAGE);
+//            return;
+        } else if (Utils.validate(message) && chatIdHash.containsKey(String.valueOf(message.getChatId()))) {
 
             UserInformation currentUserInformation = chatIdHash.get(message.getChatId().toString());
-
-            System.out.println(":::"+currentUserInformation.getInfoRequested());
-
             switch (currentUserInformation.getInfoRequested()) {
 
-
                 case INITIAL_SELECTION:
-                    System.out.println("INIT SELEC");
-
                     currentUserInformation.setInitialSelection(message.getText());
                     if (currentUserInformation.getInitialSelection().equals("1")) {
-                        canteenSelectionMessage(message, Utils.MESSAGE_LIST_OF_CANTEENS, currentUserInformation);
+                        canteenSelectionMessage(message, Utils.MESSAGE_LIST_OF_CANTEENS+Utils.compileArrayToString(Utils.arrayOfCanteens), currentUserInformation);
                     }
                     break;
                 case CANTEEN_NUMBER:
@@ -100,37 +125,24 @@ public class FoodleBot extends TelegramLongPollingBot {
                 case FOOD_ITEM:
                     currentUserInformation.setFoodItem(Utils.getFoodItemFromIndexNumber(message.getText().trim(), currentUserInformation));
                     Utils.generateFoodOrder(currentUserInformation);
-                    finalMessageToUser(message,currentUserInformation.getFoodItem());
+                    finalMessageToUser(message, currentUserInformation);
                     break;
-
-
-
-
-                case "/stop":
-                case "/help":
-                case "/menu":
+                case ORDER_PLACED:
+                    sendMessageToUser(message,"Your order has already been placed.");
             }
         }else{
-            System.out.println("ELSE");
-            UserInformation userinformation = new UserInformation();
-            chatIdHash.put(String.valueOf(message.getChatId()),userinformation);
-
-            if (message.getText().equals("/start")) {
-                messageOnstart(message, userinformation);
-            }
-
-
+            sendMessageToUser(message,Utils.ERROR_MESSAGE);
         }
 
     }
 
-    private void finalMessageToUser(Message message, String outgoingMessage) {
-        sendMessageToUser(message,outgoingMessage +Utils.getFinalMessage());
+    private void finalMessageToUser(Message message, UserInformation currentUserInformation) {
+        currentUserInformation.setInfoRequested(ORDER_PLACED);
+        sendMessageToUser(message,Utils.getFinalMessage());
     }
 
     private void foodItemSelectMessage(Message incomingMessage, String foodItemSelectionMessage, UserInformation currentUserInformation) {
-        System.out.println(currentUserInformation.getCanteen());
-        System.out.println(currentUserInformation.getStallName());
+
 
         sendMessageToUser(incomingMessage,foodItemSelectionMessage + Utils.getMenuForStall(currentUserInformation));
         currentUserInformation.setInfoRequested(FOOD_ITEM);//TODO
@@ -159,7 +171,7 @@ public class FoodleBot extends TelegramLongPollingBot {
     }
 
     private void messageOnstart(Message message, UserInformation userinformation) {
-        sendMessageToUser(message, Utils.OUTGOING_MESSAGE_ON_START);
+        sendMessageToUser(message, Utils.START_MESSAGE);
         userinformation.setInfoRequested(INITIAL_SELECTION);
     }
 

@@ -1,6 +1,6 @@
 package org.telegram;
 
-import org.telegram.updateshandlers.FoodleBot;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.updateshandlers.UserInformation;
 
 public class Utils {
@@ -24,21 +24,28 @@ public class Utils {
             "1. Vegetarian Stall\n" +
             "2. Indian Food Stall";
 
-    public static final String OUTGOING_MESSAGE_ON_START = "Hello, how may I help you? \n" +
-            "Enter 1, for placing food order \n" +
-            "Enter 2, to inquire food stall timings";
 
 
-    public static final String MESSAGE_LIST_OF_CANTEENS =  "Please choose from the following Canteens by replying with the index number.\n"
-            +"1. Canteen 1\n"
-            +"2. Canteen 2\n"
-            +"3. Canteen 3\n"
-            +"4. Canteen 4\n"
-            +"5. Canteen 5\n";
+
+//    public static final String MESSAGE_LIST_OF_CANTEENS =  "Please choose from the following Canteens by replying with the index number.\n"
+//            +"1. Canteen 1\n"
+//            +"2. Canteen 2\n"
+//            +"3. Canteen 3\n"
+//            +"4. Canteen 4\n"
+//            +"5. Canteen 5\n";
+
+    public static final String MESSAGE_LIST_OF_CANTEENS =  "Please choose from the following Canteens by replying with the index number.\n";
     public static final String FOOD_STALL_SELECTION_MESSAGE = "Please choose from the following foos stalls";
     public static final String FOOD_ITEM_SELECTION_MESSAGE = "Please select food item";
 
-    private static String[] arrayOfCanteens = {"Canteen 1", "Canteen 2", "Canteen 3", "Canteen 4", "Canteen 5"};
+    public static final String ERROR_MESSAGE = "Invalid input.\nPlease enter only numeric values!";
+
+    public static final String START_MESSAGE = "Hello, how may I help you? \nEnter 1, for placing food order \nEnter 2, to inquire food stall timings";
+    public static final String STOP_MESSAGE = "Your Order has been cancelled";
+    public static final String HELP_MESSAGE = "This bot will help you order from various canteens from around NTU. Enter /start to begin.";
+    public static final String MENU_MESSAGE = "Enter /start to start ordering or continue ordering if you were int he middle of it. We don't support /help. ";
+
+    public static String[] arrayOfCanteens = {"Canteen 1", "Canteen 2", "Canteen 3", "Canteen 4", "Canteen 5"};
 
     private static String FINAL_MESSAGE= "Your order has been generated";
 
@@ -48,23 +55,21 @@ public class Utils {
     private static String[] CANTEEN2_MALAYSIAN_STALL= {"1. food item 1", "2. food item 2", "3. food item 3"};
 
     private static String[][] canteen1FoodStallsArray = {
-            {"Indian stall",compileMenuToString(CANTEEN1_INDIAN_STALL)},
-            {"Chinese stall", compileMenuToString(CANTEEN1_CHINESE_STALL)}
+            {"Indian stall", compileArrayToString(CANTEEN1_INDIAN_STALL)},
+            {"Chinese stall", compileArrayToString(CANTEEN1_CHINESE_STALL)}
     };
 
 
     private static String[][] canteen2FoodStallsArray = {
-            {"Seafood stall",compileMenuToString(CANTEEN2_SEAFOOD_STALL)},
-            {"Malaysian stall",compileMenuToString(CANTEEN2_MALAYSIAN_STALL)}
+            {"Seafood stall", compileArrayToString(CANTEEN2_SEAFOOD_STALL)},
+            {"Malaysian stall", compileArrayToString(CANTEEN2_MALAYSIAN_STALL)}
     };
 
-    private static String compileMenuToString(String[] menu) {
-        String ret = "";
-
+    public static String compileArrayToString(String[] menu) {
+        String ret = "\n";
         for (int i = 0; i < menu.length; i++) {
-            ret = ret + menu[i];
+            ret = ret + menu[i]+"\n";
         }
-
         return ret;
     }
 
@@ -75,8 +80,7 @@ public class Utils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "ERROR";
-        //TODO Deepansh Catch Error
+        return "An error has occurred.";
     }
 
     public static String getFoodStallSelectionMessage(String canteen) {
@@ -177,5 +181,10 @@ public class Utils {
 
     public static String getFinalMessage() {
         return FINAL_MESSAGE;
+    }
+
+    public static boolean validate(Message message) {
+        String regex = "\\d+";
+        return message.getText().matches(regex);
     }
 }
