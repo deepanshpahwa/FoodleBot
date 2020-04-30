@@ -6,6 +6,7 @@ public class UserInformation {
     private String foodItem;
     private String initialSelection;
     private String infoRequested;
+    private String orderToBePickedUp;
 
     public void setCanteen(String canteen) {
         this.canteen = canteen;
@@ -45,5 +46,14 @@ public class UserInformation {
 
     public String getFoodItem() {
         return foodItem;
+    }
+
+
+    public void setOrderToBePickedUp(String orderToBePickedUp) {
+        this.orderToBePickedUp = orderToBePickedUp;
+    }
+
+    public String getOrderToBePickedUp() {
+        return orderToBePickedUp;
     }
 }

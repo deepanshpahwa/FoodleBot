@@ -3,8 +3,16 @@ package org.telegram;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.updateshandlers.UserInformation;
 
+import java.util.ArrayList;
+
 public class Utils {
-    //TODO Stushti
+
+    public static final String ORDER_PICKED_UP_MESSAGE = "You are picking up order number: ";
+    public static final String ORDER_PICKED_UP_MESSAGE_TO_ORDER_PLACER = "Your order has been picked up by ";
+    public static ArrayList<Order> listOfOrder = new ArrayList<>();
+    public static int initialInt=0;
+    public static int initialOrderNumber = 72000;
+
 
     public static final String MESSAGE_PREFIX = "Please choose from the following food stalls by replying with the index number.";
     public static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_1 = MESSAGE_PREFIX + "\n" +
@@ -164,11 +172,14 @@ public class Utils {
         return foodItem;
     }
 
-    public static void generateFoodOrder(UserInformation currentUserInformation) {
+    public static void generateFoodOrder(Message message, UserInformation currentUserInformation) {
         Order order = new Order();
+        order.setOrderNumber();
         order.setCanteen(currentUserInformation.getCanteen());
         order.setStall(currentUserInformation.getStallName());
         order.setFoodItem(currentUserInformation.getFoodItem());
+        order.setOrderPlacerChatId(message.getChatId());
+        order.setOrderPlacerUsername(message.getFrom().getUserName());
 
         addOrderToListOfOrders(order);
 
@@ -176,7 +187,20 @@ public class Utils {
     }
 
     private static void addOrderToListOfOrders(Order order) {
+        listOfOrder.add(order);
+    }
 
+    public static boolean searchListOfOrders(String number){
+        for (Order aListOfOrder : listOfOrder) {
+            if (aListOfOrder.getOrderNumber().equals(number)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static ArrayList<Order> getListOfOrder() {
+        return listOfOrder;
     }
 
     public static String getFinalMessage() {
@@ -186,5 +210,29 @@ public class Utils {
     public static boolean validate(Message message) {
         String regex = "\\d+";
         return message.getText().matches(regex);
+    }
+
+    public static boolean validateOrderNumber(String str) {
+
+        return str.length() == 5;
+    }
+
+    public static Order getOrderFromOrderNumber(String orderNumber) {
+
+       for (Order order:listOfOrder){
+           if (order.getOrderNumber().equals(orderNumber)){
+               return order;
+           }
+       }
+        return null;
+    }
+
+    public static String generateUniqueID() {
+        initialInt++;
+        return String.valueOf(initialOrderNumber +initialInt);
+    }
+
+    public static void deleteOrderFromList(Order order) {
+        listOfOrder.remove(order);
     }
 }

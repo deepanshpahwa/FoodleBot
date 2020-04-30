@@ -2,6 +2,7 @@ package org.telegram.updateshandlers;
 
 import org.telegram.BotConfig;
 import org.telegram.Chat;
+import org.telegram.Order;
 import org.telegram.Utils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -10,7 +11,6 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import javax.rmi.CORBA.Util;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -30,6 +30,8 @@ public class FoodleBot extends TelegramLongPollingBot {
     private static final String FOOD_ITEM = "food item";
     //    private static final String FOOD_ITEM_SELECTION_MESSAGE = "Please seelct food item";
     private static final String ORDER_PLACED = "order placed";
+
+    private static final String ORDER_TO_BE_PICKED_UP = "order to be picked up";
 
     private String INFO_REQUESTED = "";
 
@@ -111,6 +113,10 @@ public class FoodleBot extends TelegramLongPollingBot {
                     currentUserInformation.setInitialSelection(message.getText());
                     if (currentUserInformation.getInitialSelection().equals("1")) {
                         canteenSelectionMessage(message, Utils.MESSAGE_LIST_OF_CANTEENS+Utils.compileArrayToString(Utils.arrayOfCanteens), currentUserInformation);
+                    }else if (currentUserInformation.getInitialSelection().equals("2")){
+                        displayAvailableOrders(message, currentUserInformation);
+                    }else {
+                        sendMessageToUser(message,Utils.ERROR_MESSAGE);
                     }
                     break;
                 case CANTEEN_NUMBER:
@@ -124,15 +130,66 @@ public class FoodleBot extends TelegramLongPollingBot {
                     break;
                 case FOOD_ITEM:
                     currentUserInformation.setFoodItem(Utils.getFoodItemFromIndexNumber(message.getText().trim(), currentUserInformation));
-                    Utils.generateFoodOrder(currentUserInformation);
+                    Utils.generateFoodOrder(message,currentUserInformation);
                     finalMessageToUser(message, currentUserInformation);
                     break;
                 case ORDER_PLACED:
                     sendMessageToUser(message,"Your order has already been placed.");
+
+                case ORDER_TO_BE_PICKED_UP:
+                    String orderNumber = message.getText().trim();
+                    if (Utils.validateOrderNumber(orderNumber)) {
+                        if (Utils.searchListOfOrders(orderNumber)) {
+                            currentUserInformation.setOrderToBePickedUp(orderNumber);
+                            Order order = Utils.getOrderFromOrderNumber(orderNumber);
+                            Utils.deleteOrderFromList(order);
+                            orderPickUpConfirmationMessage(message, Utils.ORDER_PICKED_UP_MESSAGE, currentUserInformation, orderNumber);//TODO Modify message to include order number
+                            messageToOrderPlacer(order.getOrderPlacerChatId(), Utils.ORDER_PICKED_UP_MESSAGE_TO_ORDER_PLACER, message.getFrom().getUserName());
+                            System.out.println(message.getFrom().getUserName());
+                        } else {
+                            sendMessageToUser(message, Utils.ERROR_MESSAGE);//TODO modify message
+                        }
+                    }
+
+
             }
         }else{
             sendMessageToUser(message,Utils.ERROR_MESSAGE);
         }
+
+    }
+
+    private void messageToOrderPlacer(Long chatID, String orderPickedUpMessageToOrderPlacer, String userName) {
+
+        SendMessage sendMessageRequest = new SendMessage();
+        sendMessageRequest.setChatId(chatID).setText(orderPickedUpMessageToOrderPlacer + "@" +userName);
+
+        try {
+            execute(sendMessageRequest); // Sending our message object to user
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void orderPickUpConfirmationMessage(Message message, String orderPickedUpMessage, UserInformation currentUserInformation, String orderNumber) {
+        sendMessageToUser(message,orderPickedUpMessage+orderNumber);//TODO
+    }
+
+    private void displayAvailableOrders(Message message, UserInformation currentUserInformation) {
+        StringBuilder ret = new StringBuilder();
+
+        ret.append("\n");
+
+        for (Order order:Utils.getListOfOrder()) {
+            ret.append("\nOrder number: " + order.getOrderNumber());
+            ret.append("\nCanteen: " + order.getCanteen());
+            ret.append("\nFood Stall: " + order.getStall());
+            ret.append("\nFood Item" + order.getFoodItem());
+            ret.append("\nPlaced by: @"+ order.getOrderPlacerUSername());
+            ret.append("\n\n");
+        }
+        sendMessageToUser(message,ret.toString());
+        currentUserInformation.setInfoRequested(ORDER_TO_BE_PICKED_UP);
 
     }
 
@@ -145,7 +202,7 @@ public class FoodleBot extends TelegramLongPollingBot {
 
 
         sendMessageToUser(incomingMessage,foodItemSelectionMessage + Utils.getMenuForStall(currentUserInformation));
-        currentUserInformation.setInfoRequested(FOOD_ITEM);//TODO
+        currentUserInformation.setInfoRequested(FOOD_ITEM);
     }
 
     private void foodStallSelectionMessage(Message incomingMessage, String outgoingMessage, UserInformation currentUserInformation) {
