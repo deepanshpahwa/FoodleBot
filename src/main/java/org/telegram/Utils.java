@@ -9,38 +9,29 @@ public class Utils {
 
     public static final String ORDER_PICKED_UP_MESSAGE = "You are picking up order number: ";
     public static final String ORDER_PICKED_UP_MESSAGE_TO_ORDER_PLACER = "Your order has been picked up by ";
-    public static ArrayList<Order> listOfOrder = new ArrayList<>();
-    public static int initialInt=0;
-    public static int initialOrderNumber = 72000;
+    private static ArrayList<Order> listOfOrder = new ArrayList<>();
+    private static int initialInt=0;
+    private static int initialOrderNumber = 72000;
 
 
-    public static final String MESSAGE_PREFIX = "Please choose from the following food stalls by replying with the index number.";
-    public static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_1 = MESSAGE_PREFIX + "\n" +
+    private static final String MESSAGE_PREFIX = "Please choose from the following food stalls by replying with the index number.";
+    private static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_1 = MESSAGE_PREFIX + "\n" +
             "1. Vegetarian Stall\n" +
             "2. Indian Food Stall\n"+
             "3. Sushi stall";
-    public static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_2 = MESSAGE_PREFIX + "\n" +
+    private static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_2 = MESSAGE_PREFIX + "\n" +
             "1. Vegetarian Stall\n" +
             "2. Indian Food Stall";
-    public static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_3 = MESSAGE_PREFIX + "\n" +
+    private static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_3 = MESSAGE_PREFIX + "\n" +
             "1. Vegetarian Stall\n" +
             "2. Indian Food Stall";
-    public static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_4 = MESSAGE_PREFIX + "\n" +
+    private static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_4 = MESSAGE_PREFIX + "\n" +
             "1. Vegetarian Stall\n" +
             "2. Indian Food Stall";
     public static final String MESSAGE_LIST_OF_STALLS_IN_CANTEEN_5 = MESSAGE_PREFIX + "\n" +
             "1. Vegetarian Stall\n" +
             "2. Indian Food Stall";
 
-
-
-
-//    public static final String MESSAGE_LIST_OF_CANTEENS =  "Please choose from the following Canteens by replying with the index number.\n"
-//            +"1. Canteen 1\n"
-//            +"2. Canteen 2\n"
-//            +"3. Canteen 3\n"
-//            +"4. Canteen 4\n"
-//            +"5. Canteen 5\n";
 
     public static final String MESSAGE_LIST_OF_CANTEENS =  "Please choose from the following Canteens by replying with the index number.\n";
     public static final String FOOD_STALL_SELECTION_MESSAGE = "Please choose from the following foos stalls";
@@ -59,8 +50,8 @@ public class Utils {
 
     private static String[] CANTEEN1_INDIAN_STALL= {"1. Roti","2. Naan", "3. Dal"};
     private static String[] CANTEEN1_CHINESE_STALL= {"1. schezwan paneer", "2. Chicken chili", "3. Noodles"};
-    private static String[] CANTEEN2_SEAFOOD_STALL= {"1. food item 1", "2. food item 2", "3. food item 3"};
-    private static String[] CANTEEN2_MALAYSIAN_STALL= {"1. food item 1", "2. food item 2", "3. food item 3"};
+    private static String[] CANTEEN2_SEAFOOD_STALL= {"1. Seafood Pasta", "2. Shrimp Platter", "3. Fried Fish"};
+    private static String[] CANTEEN2_MALAYSIAN_STALL= {"1. Mee goreng mamak 1", "2. Apam balik 2", "3. fNasi kerabu"};
 
     private static String[][] canteen1FoodStallsArray = {
             {"Indian stall", compileArrayToString(CANTEEN1_INDIAN_STALL)},
@@ -100,19 +91,19 @@ public class Utils {
 
             } else if (canteen.equals(arrayOfCanteens[1])) {
 
-                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_1;
+                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_2;
 
             } else if (canteen.equals(arrayOfCanteens[2])) {
 
-                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_2;
+                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_3;
 
             } else if (canteen.equals(arrayOfCanteens[3])) {
 
-                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_3;
+                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_4;
 
             } else if (canteen.equals(arrayOfCanteens[4])) {
 
-                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_4;
+                return MESSAGE_LIST_OF_STALLS_IN_CANTEEN_5;
 
             }
         }catch (Exception e){
@@ -128,30 +119,21 @@ public class Utils {
                 return canteen1FoodStallsArray[Integer.parseInt(stallNumber)-1][0];
             case "Canteen 2":
                 return canteen2FoodStallsArray[Integer.parseInt(stallNumber)-1][0];
-
-
-            //TODO add more cases
             default:
-                return ""; //Also send error to user and ask same question again//TODO
+                return "";
         }
 
     }
 
     public static String getMenuForStall(UserInformation userInformation) {
-
         String currentCanteen = userInformation.getCanteen();
         String currentStall = userInformation.getStallName();
 
         if (currentCanteen.equals("Canteen 1")){
-
             for (int i = 0; i < canteen1FoodStallsArray.length; i++) {
-
                 if (currentStall.equals(canteen1FoodStallsArray[i][0])){
                     return canteen1FoodStallsArray[i][1];
-
                 }
-
-
             }
         }
 
@@ -162,13 +144,10 @@ public class Utils {
                 }
             }
         }
-
-
-        return null;//TODO
+        return null;
     }
 
     public static String getFoodItemFromIndexNumber(String foodItem, UserInformation currentUserInformation) {
-
         return foodItem;
     }
 
@@ -182,8 +161,6 @@ public class Utils {
         order.setOrderPlacerUsername(message.getFrom().getUserName());
 
         addOrderToListOfOrders(order);
-
-
     }
 
     private static void addOrderToListOfOrders(Order order) {
@@ -213,12 +190,10 @@ public class Utils {
     }
 
     public static boolean validateOrderNumber(String str) {
-
         return str.length() == 5;
     }
 
     public static Order getOrderFromOrderNumber(String orderNumber) {
-
        for (Order order:listOfOrder){
            if (order.getOrderNumber().equals(orderNumber)){
                return order;

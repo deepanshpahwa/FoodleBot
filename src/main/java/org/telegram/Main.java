@@ -6,10 +6,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.updateshandlers.*;
 
 /**
- * @author Ruben Bermudez
+ * @author Srushti Sunder
  * @version 1.0
  * @brief Main class to create all bots
- * @date 20 of June of 2015
+ * @date 19 January 2020
  */
 public class Main {
 

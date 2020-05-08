@@ -1,7 +1,6 @@
 package org.telegram.updateshandlers;
 
 import org.telegram.BotConfig;
-import org.telegram.Chat;
 import org.telegram.Order;
 import org.telegram.Utils;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -11,15 +10,14 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.logging.BotLogger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 
 /**
- * @author
+ * @Srushti Sunder
  * @version 1.0
  * @brief Handler for updates to FoodleNTU Bot
- * @date 24 of June of 2015
+ * @date 19 January 2020
  */
 public class FoodleBot extends TelegramLongPollingBot {
     private static final String LOGTAG = "FOODLE_BOT_NTU_HANDLER";
@@ -28,14 +26,10 @@ public class FoodleBot extends TelegramLongPollingBot {
     private static final String STALL_NUMBER = "stall number" ;
     private static final String INITIAL_SELECTION = "initial selection";
     private static final String FOOD_ITEM = "food item";
-    //    private static final String FOOD_ITEM_SELECTION_MESSAGE = "Please seelct food item";
     private static final String ORDER_PLACED = "order placed";
 
     private static final String ORDER_TO_BE_PICKED_UP = "order to be picked up";
 
-    private String INFO_REQUESTED = "";
-
-    private static ArrayList<Chat> chatList;
     private HashMap<String, UserInformation> chatIdHash;
 
     public FoodleBot() {
@@ -44,18 +38,17 @@ public class FoodleBot extends TelegramLongPollingBot {
     }
 
     private void createListOfChats() {
-//        chatList = new ArrayList<Chat>();
         chatIdHash = new HashMap<>();
     }
 
     @Override
     public String getBotToken() {
-        return BotConfig.WEATHER_TOKEN;
+        return BotConfig.FOODLEBOT_TOKEN;
     }
 
     @Override
     public String getBotUsername() {
-        return BotConfig.WEATHER_USER;
+        return BotConfig.FOODLEBOT_USER;
     }
 
     @Override
@@ -73,9 +66,7 @@ public class FoodleBot extends TelegramLongPollingBot {
     }
 
     private void handleIncomingMessage(Message message) {
-//        if (!Utils.validate(message)){
-//            sendMessageToUser(message,Utils.ERROR_MESSAGE);
-//        }
+
         String inputMessage = message.getText();
 
         if (inputMessage.equals("/start")){
@@ -101,9 +92,6 @@ public class FoodleBot extends TelegramLongPollingBot {
         } else if (inputMessage.equals("/menu")) {
             sendMessageToUser(message, Utils.MENU_MESSAGE);
             return;
-//        } else if ((!Utils.validate(message))){
-//            sendMessageToUser(message,Utils.ERROR_MESSAGE);
-//            return;
         } else if (Utils.validate(message) && chatIdHash.containsKey(String.valueOf(message.getChatId()))) {
 
             UserInformation currentUserInformation = chatIdHash.get(message.getChatId().toString());
@@ -165,7 +153,7 @@ public class FoodleBot extends TelegramLongPollingBot {
         sendMessageRequest.setChatId(chatID).setText(orderPickedUpMessageToOrderPlacer + "@" +userName);
 
         try {
-            execute(sendMessageRequest); // Sending our message object to user
+            execute(sendMessageRequest);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -185,7 +173,7 @@ public class FoodleBot extends TelegramLongPollingBot {
             ret.append("\nCanteen: " + order.getCanteen());
             ret.append("\nFood Stall: " + order.getStall());
             ret.append("\nFood Item" + order.getFoodItem());
-            ret.append("\nPlaced by: @"+ order.getOrderPlacerUSername());
+            ret.append("\nPlaced by: @"+ order.getOrderPlacerUsername());
             ret.append("\n\n");
         }
         sendMessageToUser(message,ret.toString());
@@ -232,7 +220,5 @@ public class FoodleBot extends TelegramLongPollingBot {
         userinformation.setInfoRequested(INITIAL_SELECTION);
     }
 
-//    public static void logger(String s) {
-//        System.out.println("::"+s);
-//    }
+
 }

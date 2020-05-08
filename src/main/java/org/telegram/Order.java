@@ -7,7 +7,7 @@ public class Order {
     private String foodItem;
     private String orderNumber;
     private Long orderPlacerChatID;
-    private String orderPlacerUSername;
+    private String orderPlacerUsername;
 
     public void setCanteen(String canteen) {
         this.canteen = canteen;
@@ -50,10 +50,10 @@ public class Order {
     }
 
     public void setOrderPlacerUsername(String orderPlacerUsername) {
-        this.orderPlacerUSername = orderPlacerUsername;
+        this.orderPlacerUsername = orderPlacerUsername;
     }
 
-    public String getOrderPlacerUSername() {
-        return orderPlacerUSername;
+    public String getOrderPlacerUsername() {
+        return orderPlacerUsername;
     }
 }
